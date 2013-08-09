@@ -92,7 +92,7 @@ class RandomStringIterator implements Iterator {
 void setup() {
   int i;
   minim = new Minim(this);
-  size(800,200);
+  size(800,800);
 
   for (i=0; i<NUM_BANKS; i++) {
     selectFolder("choose wave folder (bank " + (i+1) + ")", "addFolder");
@@ -143,6 +143,9 @@ int nextTriggerTime = millis();
 AudioSample currentSample;
 
 void draw() {
+  
+  background(0);
+  
   if (nextTriggerTime <= millis()) {
     if (currentSample != null) {
       currentSample.close();
@@ -157,6 +160,12 @@ void draw() {
       System.out.println("samples.take() failed, error was " + e.toString());
     }
   }
+  
+  if (xPos >= 0 && yPos >= 0) {
+    fill(255);
+    ellipse(mouseX, mouseY, width * xPad * 2, height * yPad * 2);
+  }
+  
 }
 
 void mouseDragged() {
