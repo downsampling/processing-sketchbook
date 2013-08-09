@@ -16,7 +16,7 @@ float xPad = 0.1;
 float yPos = -1;
 float yPad = 0.1;
 
-int NUM_BANKS = 2;
+int NUM_BANKS = 3;
 
 Minim minim;
 
@@ -110,13 +110,24 @@ void setup() {
 void loadSamples() {
   String fileName;
   Iterator<String> fileNameIter;
+  int minIndex;
+  int maxIndex;
   try {
     fileNameIter = fileNameIters.get(int(random(NUM_BANKS)));
     while (true) {
       if (!fileNameIter.hasNext()) {
-        break;
+        break; // TODO shouldn't break unless all iters are exhausted?
       }
-      fileNameIter = fileNameIters.get(int(random(NUM_BANKS)));
+      // choose a bank based on y pos
+      if (yPos == -1) {
+        fileNameIter = fileNameIters.get(int(random(NUM_BANKS)));
+      } else {
+        minIndex = int(max(0, yPos-yPad) * NUM_BANKS);
+        maxIndex = int(min(1, yPos+yPad) * NUM_BANKS);
+        System.out.println("bank range: (" + minIndex + "," + maxIndex + ")");
+        fileNameIter = fileNameIters.get(int(random(minIndex, maxIndex+1)));
+      }
+      
       sampleChits.take();
       fileName = fileNameIter.next();
       System.out.println("loading sample for file " + fileName);
