@@ -8,18 +8,24 @@ import ddf.minim.*;
 
 LinkedBlockingQueue<Integer> sampleChits;
 LinkedBlockingQueue<AudioSample> samples;
-ArrayList<String> fileNames = new ArrayList<String>(); 
-Iterator<String> fileNameIter;
+
+ArrayList<Iterator<String>> fileNameIters = new ArrayList<Iterator<String>>();
 
 float xPos = -1;
 float xPad = 0.1;
+float yPos = -1;
+float yPad = 0.1;
+
+int NUM_BANKS = 2;
 
 Minim minim;
 
-void folderSelected(File d) {
+void addFolder(File d) {
   int i;
   String fileName; 
-
+  ArrayList<String> fileNames = new ArrayList<String>(); 
+  Iterator<String> fileNameIter;
+  
   if (d != null) {
     File[] files = d.listFiles();
     for (i = 0; i < files.length; i++) {
@@ -29,8 +35,16 @@ void folderSelected(File d) {
     }
     Collections.sort(fileNames);
     fileNameIter = new RandomStringIterator(fileNames);
-    thread("loadSamples");
+    System.out.println("adding " + d.getName());
+    newFileNameIter(fileNameIter);
   }
+}
+
+void newFileNameIter(Iterator<String> i) {
+    fileNameIters.add(i);
+    if (fileNameIters.size() == NUM_BANKS) {
+      thread("loadSamples");
+    }
 }
 
 class RandomStringIterator implements Iterator {
@@ -75,25 +89,14 @@ class RandomStringIterator implements Iterator {
   
 }
 
-ArrayList<RandomStringIterator> fileNameIterators = new ArrayList<RandomStringIterator>();
-
 void setup() {
   int i;
   minim = new Minim(this);
   size(800,200);
 
-  selectFolder("choose wave folder", "folderSelected");
-  /*
-  File d = new File(sketchPath(""));
-  File[] files = d.listFiles();
-  for (i = 0; i < files.length; i++) {
-    if (files[i].getName().endsWith(".wav")) {
-      fileNames.add(files[i].getName());
-    }
+  for (i=0; i<NUM_BANKS; i++) {
+    selectFolder("choose wave folder (bank " + (i+1) + ")", "addFolder");
   }
-    
-  fileNameIter = fileNames.iterator();
-  */
 
   sampleChits = new LinkedBlockingQueue<Integer>(16);
   for (i=0; i<16; i++) {
@@ -106,8 +109,14 @@ void setup() {
 
 void loadSamples() {
   String fileName;
+  Iterator<String> fileNameIter;
   try {
-    while (fileNameIter.hasNext()) {
+    fileNameIter = fileNameIters.get(int(random(NUM_BANKS)));
+    while (true) {
+      if (!fileNameIter.hasNext()) {
+        break;
+      }
+      fileNameIter = fileNameIters.get(int(random(NUM_BANKS)));
       sampleChits.take();
       fileName = fileNameIter.next();
       System.out.println("loading sample for file " + fileName);
@@ -141,11 +150,12 @@ void draw() {
 
 void mouseDragged() {
   xPos = mouseX / float(width);
+  yPos = mouseY / float(height);
   System.out.println("xPos: " + xPos);
 }
 
 void mouseReleased() {
-  xPos = -1;
-  System.out.println("xPos: " + xPos);
+  xPos = yPos = -1;
+  System.out.println("xPos / yPos reset");
 }
 
