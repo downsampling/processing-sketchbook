@@ -28,6 +28,9 @@ float yPad = 0.1;
 int NUM_BANKS = 3;
 int CHEAT_FACTOR = 10;
 
+boolean cvDisabled = false;
+boolean audioPaused = false;
+
 Minim minim;
 
 void addFolder(File d) {
@@ -164,7 +167,11 @@ void draw() {
   
   background(255);
   
-  if (nextTriggerTime <= millis()) {
+  if (audioPaused) {
+    fill(0);
+    textSize(10);
+    text("audio is paused", 10, height - 10);
+  } else if (nextTriggerTime <= millis()) {
     if (currentSample != null) {
       currentSample.close();
       sampleChits.add(1);
@@ -179,8 +186,7 @@ void draw() {
     }
   }
   
-  background(255);
-  if (cam.available() == true) { // si une nouvelle frame est disponible sur la webcam
+  if (!cvDisabled && cam.available() == true) { // si une nouvelle frame est disponible sur la webcam
     cam.read(); // acquisition d'un frame 
     opencv.copy(cam.get()); // autre possibilité - charge directement l'image GSVideo dans le buffer openCV
     opencv.flip("HORIZONTAL");
@@ -204,6 +210,7 @@ void draw() {
     //fill(255);
     //ellipse(mouseX, mouseY, width * xPad * 2, height * yPad * 2);
     stroke(0);
+    noFill();
     rect((xPos-xPad)*width, (yPos-yPad)*height, xPad*2*width, yPad*2*height);
   }
   
@@ -218,5 +225,15 @@ void mouseDragged() {
 void mouseReleased() {
   xPos = yPos = -1;
   System.out.println("xPos / yPos reset");
+}
+
+void keyReleased() {
+  if (key == ' ') {
+    audioPaused = !audioPaused;
+    System.out.println("audioPaused is " + audioPaused);
+  } else if (key == 'c') {
+    cvDisabled = !cvDisabled;
+    System.out.println("cvDisabled is " + cvDisabled);
+  }
 }
 
