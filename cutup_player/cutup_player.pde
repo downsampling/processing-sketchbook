@@ -106,7 +106,7 @@ class RandomStringIterator implements Iterator {
 
 void setup() {
 
-  size(800,600);
+  size(1184, 656);
   //frameRate(10);
   cam = new GSCapture(this, width, height);
   opencv = new OpenCV(this); // initialise objet OpenCV à partir du parent This
@@ -180,13 +180,19 @@ void draw() {
       currentSample = samples.take();
       currentSample.trigger();
       System.out.println("triggering: " + currentSample);
-      nextTriggerTime = millis() + currentSample.length() - CHEAT_FACTOR;
+      nextTriggerTime = millis() + currentSample.length() - (cvDisabled ? CHEAT_FACTOR : CHEAT_FACTOR * 2);
     } catch (Exception e) {
       System.out.println("samples.take() failed, error was " + e.toString());
     }
   }
   
-  if (!cvDisabled && cam.available() == true) { // si une nouvelle frame est disponible sur la webcam
+  if (cvDisabled) {
+    fill(0);
+    textSize(10);
+    text("cv is disabled", width - 90, height - 10);
+    xPos = -1;
+    yPos = -1;
+  } else if (cam.available() == true) { // si une nouvelle frame est disponible sur la webcam
     cam.read(); // acquisition d'un frame 
     opencv.copy(cam.get()); // autre possibilité - charge directement l'image GSVideo dans le buffer openCV
     opencv.flip("HORIZONTAL");
