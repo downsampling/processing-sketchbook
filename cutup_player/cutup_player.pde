@@ -25,7 +25,7 @@ float xPad = 0.1;
 float yPos = -1;
 float yPad = 0.1;
 
-int NUM_BANKS = 3;
+int NUM_BANKS = 5;
 int CHEAT_FACTOR = 10;
 
 boolean cvDisabled = false;
